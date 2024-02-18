@@ -39,7 +39,17 @@ public class AuthTokenFilter  extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         }
-        filterChain.doFilter(request, response);
+
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res= (HttpServletResponse) response;
+
+        res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+        res.setHeader("Access-Control-Max-Age", "3600");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
+
+        filterChain.doFilter(req, res);
 
     }
 

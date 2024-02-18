@@ -44,11 +44,19 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest request){
         String username = request.getUsername();
         String password = request.getPassword();
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = jwtUtil.generateJwtToken(authentication);
-        return ResponseEntity.ok(token);
+        if(!userRepository.existsByUsername(username)){
+            return new ResponseEntity<>("Check username or password!", HttpStatus.BAD_REQUEST);
+        }
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String token = jwtUtil.generateJwtToken(authentication);
+            return ResponseEntity.ok(token);
+        }catch(Exception e){
+            return new ResponseEntity<>("Check username or password!", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/signup")
@@ -73,8 +81,9 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok("User registered successfully!");
-
     }
 
-
 }
+
+
+
