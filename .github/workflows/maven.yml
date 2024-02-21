@@ -52,8 +52,9 @@ jobs:
           HOSTNAME: ${{secrets.SSH_HOST}}
           USER_NAME: ${{secrets.USER_NAME}}
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+          echo "$PRIVATE_KEY" >> $HOME/key.pem
+          chmod 400 $HOME/key.pem
+          ssh -o StrictHostKeyChecking=no -i $HOME/key.pem ${USER_NAME}@${HOSTNAME} '
           aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar &&
           ls /opt/myapp &&
           nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
