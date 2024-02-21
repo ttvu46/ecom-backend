@@ -49,9 +49,9 @@ jobs:
       - name: Execute SSH command
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }} # Add your EC2 instance's public IP or hostname as a secret
-          username: ec2-user # Default AWS EC2 username, change if different
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY  }}
           script: |
             whoami
             sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar
