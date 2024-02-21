@@ -41,28 +41,23 @@ jobs:
           ls ./target/*.jar
           aws s3 cp ./target/*.jar s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar
         
-  update-ec2:
-    needs: build-and-upload
+
+  ssh:
+    name: SSH Command
     runs-on: ubuntu-latest
     steps:
-      - name: Configure SSH agent
-        uses: webfactory/ssh-agent@v0.8.0
+      - name: Execute SSH command
+        uses: appleboy/ssh-action@master
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Deploy code from S3
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.SSH_HOST }} << EOF
-          # Improved error handling and execution flow
-          set -e  # Exit on first error
-
-          # Update application on EC2 using improved commands
-          sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar \
-               || printf "\n\033[1m[ERROR]: AWS S3 copy failed.\033[0m\n" && exit 1
-          ls /opt/myapp
-          pkill -f 'java -jar'
-          nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
-          EOF
-  
+          host: ${{ secrets.EC2_HOST }} # Add your EC2 instance's public IP or hostname as a secret
+          username: ec2-user # Default AWS EC2 username, change if different
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            whoami
+            sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar
+            ls /opt/myapp
+            pkill -f 'java -jar'
+            nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
 
 #          "
 #          aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar &&
