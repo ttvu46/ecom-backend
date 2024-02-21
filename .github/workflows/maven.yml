@@ -40,24 +40,40 @@ jobs:
       run: |
           ls ./target/*.jar
           aws s3 cp ./target/*.jar s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar
-        
-
-  ssh:
-    name: SSH Command
+  Deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     steps:
-      - name: Execute SSH command
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_PRIVATE_KEY  }}
-          script: |
-            whoami 
-            sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar 
-            ls /opt/myapp 
-            pkill -f 'java -jar' 
-            nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
+      - uses: actions/checkout@v2
+      - name: SSH to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{secrets.SSH_HOST}}
+          USER_NAME: ${{secrets.USER_NAME}}
+
+        run: |
+            echo "$PRIVATE_KEY" >> $HOME/key.pem
+            chmod 400 "$HOME/key.pem"
+            ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" ${USER_NAME}@${HOSTNAME} << EOF
+              mkdir abc
+            EOF
+
+#  ssh:
+#    name: SSH Command
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Execute SSH command
+#        uses: appleboy/ssh-action@v1.0.3
+#        with:
+#          host: ${{ secrets.SSH_HOST }}
+#          username: ec2-user
+#          key: ${{ secrets.SSH_PRIVATE_KEY  }}
+#          script: |
+#            whoami
+#            sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar
+#            ls /opt/myapp
+#            pkill -f 'java -jar'
+#            nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
 
 #          "
 #          aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar &&
