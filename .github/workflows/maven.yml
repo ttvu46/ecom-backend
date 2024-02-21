@@ -47,16 +47,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Execute SSH command
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY  }}
           script: |
-            whoami &&
-            sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar &&
-            ls /opt/myapp &&
-            pkill -f 'java -jar' &&
+            whoami 
+            sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar 
+            ls /opt/myapp 
+            pkill -f 'java -jar' 
             nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
 
 #          "
