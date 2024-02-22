@@ -52,6 +52,7 @@ jobs:
           USER_NAME: ec2-user
 
         run: |
+            echo "$USER_NAME@$HOSTNAME"
             echo "$PRIVATE_KEY" >> "$HOME/key.pem"
             echo "$HOME/key.pem"
             chmod 400 "$HOME/key.pem"
