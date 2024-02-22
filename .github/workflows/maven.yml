@@ -56,45 +56,41 @@ jobs:
             echo "$PRIVATE_KEY" >> "$HOME/key.pem"
             echo "$HOME/key.pem"
             chmod 400 "$HOME/key.pem"
-            ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" "$USER_NAME@$HOSTNAME" << EOF
+            ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" "$USER_NAME@$HOSTNAME" << EOF 
+              # Check if Java is installed using the 'java -version' command
+              if [[ ! $(java -version 2>&1) =~ "openjdk 17" ]]; then
+                # Java is not installed, so proceed with installation
+                sudo yum install -y java-17-amazon-corretto-devel
+                echo "Java has been installed successfully."
+              else
+                # Java is already installed
+                echo "Java is already present on the system."
+              fi
+              # Check if the aws command exists
+              if ! command -v aws >/dev/null 2>&1; then
+                echo "AWS CLI not found. Downloading and installing..."
+                # Download the installer
+                if ! curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscli.zip" >/dev/null 2>&1; then
+                  echo "Download failed. Please check your internet connection and try again."
+                  exit 1
+                fi
+              
+                # Extract the installer
+                if ! unzip awscli.zip >/dev/null 2>&1; then
+                  echo "Extraction failed. Please check if you have unzip installed."
+                  exit 1
+                fi
+              
+                # Install the AWS CLI
+                if ! sudo ./aws/install >/dev/null 2>&1; then
+                  echo "Installation failed. Please check the logs for more information."
+                  exit 1
+                fi
+                echo "AWS CLI installed successfully."
+              else
+                echo "AWS CLI already installed."
+              fi
+              aws --version        
               aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" ecom.jar
-              ls
               nohup java -jar ecom.jar > app.log 2>&1 &
             EOF
-
-#  ssh:
-#    name: SSH Command
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Execute SSH command
-#        uses: appleboy/ssh-action@v1.0.3
-#        with:
-#          host: ${{ secrets.SSH_HOST }}
-#          username: ec2-user
-#          key: ${{ secrets.SSH_PRIVATE_KEY  }}
-#          script: |
-#            whoami
-#            sudo aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar
-#            ls /opt/myapp
-#            pkill -f 'java -jar'
-#            nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
-
-#          "
-#          aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar &&
-#          ls /opt/myapp &&
-#          nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
-#          "
-
-#        env:
-#          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-#          HOSTNAME: ${{secrets.SSH_HOST}}
-#          USER_NAME: ${{secrets.USER_NAME}}
-#        run: |
-#          echo "$PRIVATE_KEY" >> $HOME/key.pem
-#          chmod 400 "$HOME/key.pem"
-#          ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" ${USER_NAME}@${HOSTNAME}
-#          '
-#          aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/ecom.jar &&
-#          ls /opt/myapp &&
-#          nohup java -jar /opt/myapp/ecom.jar > app.log 2>&1 &
-#          '
