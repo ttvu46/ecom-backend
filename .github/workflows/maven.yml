@@ -55,7 +55,7 @@ jobs:
             echo "$PRIVATE_KEY" >> "$HOME/key.pem"
             echo "$HOME/key.pem"
             chmod 400 "$HOME/key.pem"
-            ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" ec2-user@ec2-54-149-231-21.us-west-2.compute.amazonaws.com << EOF
+            ssh -o StrictHostKeyChecking=no -i "$HOME/key.pem" "$USER_NAME"@ec2-54-149-231-21.us-west-2.compute.amazonaws.com << EOF
               mkdir opt/myapp
               aws s3 cp "s3://${{ secrets.S3_BUCKET_NAME }}/ecom.jar" /opt/myapp/
             EOF
