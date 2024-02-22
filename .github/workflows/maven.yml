@@ -48,8 +48,8 @@ jobs:
       - name: SSH to EC2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          HOSTNAME: ${{secrets.SSH_HOST}}
-          USER_NAME: ${{secrets.USER_NAME}}
+          HOSTNAME: ec2-54-149-231-21.us-west-2.compute.amazonaws.com
+          USER_NAME: ec2-user
 
         run: |
             echo "$PRIVATE_KEY" >> "$HOME/key.pem"
